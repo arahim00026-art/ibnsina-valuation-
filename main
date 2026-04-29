@@ -1,0 +1,112 @@
+%%writefile app.py
+import streamlit as st
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+
+# Page Config
+st.set_page_config(page_title="Ibnsina Pharma Equity Research", layout="wide")
+
+# Custom CSS for a professional look
+st.markdown("""
+    <style>
+    .main { background-color: #f8f9fa; }
+    .stMetric { background-color: #ffffff; padding: 15px; border-radius: 10px; border: 1px solid #e0e0e0; }
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- DATA PREPARATION ---
+def get_data():
+    # Historical Performance
+    hist_data = {
+        'Year': ['FY22', 'FY23', 'FY24', 'FY25E'],
+        'Revenue (EGP Bn)': [22.26, 33.95, 55.84, 76.60], # FY22 derived from FY23 growth
+        'Net Income (EGP Mn)': [None, 213.7, 614.5, 921.0],
+        'Gross Margin (%)': [7.3, 7.4, 7.9, 8.1],
+        'EBITDA Margin (%)': [3.0, 3.9, 4.5, 4.8]
+    }
+    
+    # Forecast Data
+    forecast_data = {
+        'Year': ['2026E', '2027E', '2028E', '2029E', '2030E'],
+        'Growth (%)': [25, 22, 18, 15, 13],
+        'EBITDA Margin (%)': [5.0, 5.2, 5.5, 5.8, 6.0]
+    }
+    
+    # Sensitivity Analysis Table
+    sensitivity = pd.DataFrame({
+        'WACC \ g': ['17.0%', '18.0%', '18.5%', '19.5%', '21.0%'],
+        '5.5%': [23.8, 20.9, 19.7, 17.6, 15.2],
+        '7.0%': [27.1, 23.5, 22.1, 19.6, 16.8],
+        '8.5%': [31.2, 26.7, 25.0, 22.1, 18.7]
+    })
+    
+    return pd.DataFrame(hist_data), pd.DataFrame(forecast_data), sensitivity
+
+df_hist, df_fore, df_sens = get_data()
+
+# --- SIDEBAR ---
+st.sidebar.title("Analyst: Abdelrahim Elsweedy")
+st.sidebar.image("https://img.icons8.com/ios-filled/100/000000/medical-doctor.png", width=100)
+st.sidebar.markdown("### Recommendation: **BUY**")
+st.sidebar.markdown("### Target Price: **EGP 20.0**")
+st.sidebar.write("---")
+st.sidebar.info("Ibnsina Pharma (ISPH.CA) is Egypt’s leading pharmaceutical distributor.")
+
+# --- HEADER ---
+st.title("📊 Equity Research: Ibnsina Pharma (ISPH.CA)")
+st.subheader("Initiation of Coverage Dashboard")
+
+# Top Metrics
+m1, m2, m3, m4 = st.columns(4)
+m1.metric("Target Price", "EGP 20.0")
+m2.metric("Upside Potential", "~85%", "Strong Buy", delta_color="normal")
+m3.metric("Market Share (FY24)", "30.8%", "↑ 6.6%")
+m4.metric("WACC Assumption", "18.5%")
+
+st.divider()
+
+# --- VISUALS SECTION ---
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("### Historical Revenue Growth (EGP Bn)")
+    fig_rev = px.line(df_hist, x='Year', y='Revenue (EGP Bn)', text='Revenue (EGP Bn)', markers=True)
+    fig_rev.update_traces(textposition="top center", line_color='#1f77b4')
+    st.plotly_chart(fig_rev, use_container_width=True)
+
+with col2:
+    st.markdown("### Margin Expansion Trend")
+    fig_margin = go.Figure()
+    fig_margin.add_trace(go.Scatter(x=df_hist['Year'], y=df_hist['Gross Margin (%)'], name='Gross Margin', mode='lines+markers'))
+    fig_margin.add_trace(go.Scatter(x=df_hist['Year'], y=df_hist['EBITDA Margin (%)'], name='EBITDA Margin', mode='lines+markers'))
+    fig_margin.update_layout(yaxis_suffix="%", legend_orientation="h")
+    st.plotly_chart(fig_margin, use_container_width=True)
+
+st.divider()
+
+# --- FORECAST & VALUATION ---
+col3, col4 = st.columns([1, 1])
+
+with col3:
+    st.markdown("### Revenue Growth Forecast (2026-2030)")
+    fig_fore = px.bar(df_fore, x='Year', y='Growth (%)', color='Growth (%)', color_continuous_scale='Blues')
+    st.plotly_chart(fig_fore, use_container_width=True)
+
+with col4:
+    st.markdown("### DCF Sensitivity Analysis (EGP)")
+    st.table(df_sens.set_index('WACC \ g'))
+    st.caption("Sensitivity of Fair Value to WACC and Terminal Growth Rate (g)")
+
+# --- INVESTMENT THESIS TABLE ---
+st.markdown("### 🔑 Investment Thesis Pillars")
+thesis_cols = st.columns(3)
+with thesis_cols[0]:
+    st.info("**Structural Demand**\n\nInelastic pharmaceutical consumption and 1.5%+ population growth.")
+with thesis_cols[1]:
+    st.info("**Inflation Pass-Through**\n\nRe-pricing mechanisms protect margins in high-inflation environments.")
+with thesis_cols[2]:
+    st.info("**Operational Leverage**\n\nDigitalization and scale driving EBITDA towards 6.0% target.")
+
+# Disclaimer
+st.caption("Disclaimer: Prepared for educational purposes. Not financial advice.")
