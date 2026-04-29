@@ -20,20 +20,17 @@ def get_data():
         'Gross Margin (%)': [7.3, 7.4, 7.9, 8.1],
         'EBITDA Margin (%)': [3.0, 3.9, 4.5, 4.8]
     }
-    
     forecast_data = {
         'Year': ['2026E', '2027E', '2028E', '2029E', '2030E'],
         'Growth (%)': [25, 22, 18, 15, 13],
         'EBITDA Margin (%)': [5.0, 5.2, 5.5, 5.8, 6.0]
     }
-    
     sensitivity = pd.DataFrame({
         'WACC \ g': ['17.0%', '18.0%', '18.5%', '19.5%', '21.0%'],
         '5.5%': [23.8, 20.9, 19.7, 17.6, 15.2],
         '7.0%': [27.1, 23.5, 22.1, 19.6, 16.8],
         '8.5%': [31.2, 26.7, 25.0, 22.1, 18.7]
     })
-    
     return pd.DataFrame(hist_data), pd.DataFrame(forecast_data), sensitivity
 
 df_hist, df_fore, df_sens = get_data()
@@ -41,7 +38,6 @@ df_hist, df_fore, df_sens = get_data()
 st.sidebar.title("Abdelrahim Elsweedy")
 st.sidebar.markdown("### Recommendation: **BUY**")
 st.sidebar.markdown("### Target Price: **EGP 20.0**")
-st.sidebar.divider()
 
 st.title("📊 Ibnsina Pharma (ISPH.CA)")
 st.subheader("Equity Research Dashboard")
@@ -55,11 +51,9 @@ m4.metric("WACC", "18.5%")
 st.divider()
 
 col1, col2 = st.columns(2)
-
 with col1:
     st.markdown("### Historical Revenue (EGP Bn)")
     fig_rev = px.line(df_hist, x='Year', y='Revenue (EGP Bn)', text='Revenue (EGP Bn)', markers=True)
-    fig_rev.update_traces(textposition="top center")
     st.plotly_chart(fig_rev, use_container_width=True)
 
 with col2:
@@ -67,13 +61,11 @@ with col2:
     fig_margin = go.Figure()
     fig_margin.add_trace(go.Scatter(x=df_hist['Year'], y=df_hist['Gross Margin (%)'], name='Gross Margin'))
     fig_margin.add_trace(go.Scatter(x=df_hist['Year'], y=df_hist['EBITDA Margin (%)'], name='EBITDA Margin'))
-    fig_margin.update_layout(legend_orientation="h")
     st.plotly_chart(fig_margin, use_container_width=True)
 
 st.divider()
 
 col3, col4 = st.columns(2)
-
 with col3:
     st.markdown("### Growth Forecast (%)")
     fig_fore = px.bar(df_fore, x='Year', y='Growth (%)')
@@ -83,5 +75,4 @@ with col4:
     st.markdown("### DCF Sensitivity Table")
     st.table(df_sens.set_index('WACC \ g'))
 
-st.divider()
 st.caption("Disclaimer: Educational purposes only.")
